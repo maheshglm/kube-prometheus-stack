@@ -31,7 +31,7 @@ commonLabels: {}
 ## Install Prometheus Operator CRDs
 ##
 crds:
-  enabled: true
+  enabled: false
 
 ## Create default rules for monitoring the cluster
 ##
