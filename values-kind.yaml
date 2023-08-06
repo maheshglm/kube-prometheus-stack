@@ -331,13 +331,16 @@ alertmanager:
   #       {{ end }}
 
   ingress:
-    enabled: false
+    enabled: true
 
     # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
     # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
-    # ingressClassName: nginx
+    ingressClassName: nginx
 
-    annotations: {}
+    # https://fabianlee.org/2022/07/02/prometheus-exposing-prometheus-grafana-as-ingress-for-kube-prometheus-stack/
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+      cert-manager.io/cluster-issuer: letsdevops-custom-ca-clusterissuer
 
     labels: {}
 
@@ -349,12 +352,12 @@ alertmanager:
 
     ## Hosts must be provided if Ingress is enabled.
     ##
-    hosts: []
+    hosts: ['monitoring.internal.letsdevops.link']
       # - alertmanager.domain.com
 
     ## Paths to use for ingress rules - one path should match the alertmanagerSpec.routePrefix
     ##
-    paths: []
+    paths: ['/alertmanager(/|$)(.*)']
     # - /
 
     ## For Kubernetes >= 1.18 you should specify the pathType (determines how Ingress paths should be matched)
@@ -364,7 +367,11 @@ alertmanager:
     ## TLS configuration for Alertmanager Ingress
     ## Secret must be manually created in the namespace
     ##
-    tls: []
+    tls:
+    - secretName: monitoring-internal-letsdevops-tls
+      hosts:
+      - "monitoring.internal.letsdevops.link"
+
     # - secretName: alertmanager-general-tls
     #   hosts:
     #   - alertmanager.example.com
@@ -667,7 +674,7 @@ alertmanager:
     ## Time duration Alertmanager shall retain data for. Default is '120h', and must match the regular expression
     ## [0-9]+(ms|s|m|h) (milliseconds seconds minutes hours).
     ##
-    retention: 120h
+    retention: 10h
 
     ## Storage is the definition of how storage will be used by the Alertmanager instances.
     ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/user-guides/storage.md
@@ -685,12 +692,12 @@ alertmanager:
 
     ## The external URL the Alertmanager instances will be available under. This is necessary to generate correct URLs. This is necessary if Alertmanager is not served from root of a DNS name. string  false
     ##
-    externalUrl:
+    externalUrl: https://monitoring.internal.letsdevops.link/alertmanager
 
     ## The route prefix Alertmanager registers HTTP handlers for. This is useful, if using ExternalURL and a proxy is rewriting HTTP routes of a request, and the actual ExternalURL is still true,
     ## but the server serves requests under a different route prefix. For example for use with kubectl proxy.
     ##
-    routePrefix: /
+    routePrefix: "/"
 
     ## scheme: HTTP scheme to use. Can be used with `tlsConfig` for example if using istio mTLS.
     scheme: ""
@@ -880,23 +887,24 @@ grafana:
     ## If true, Grafana PSPs will be created
     ##
     pspEnabled: false
-
+  # env:
+  #   GF_SERVER_ROOT_URL: https://monitoring.internal.letsdevops.link/grafana
+  #   GF_SERVER_SERVE_FROM_SUB_PATH: 'true'
   ingress:
     ## If true, Grafana Ingress will be created
     ##
-    enabled: false
+    enabled: true
 
     ## IngressClassName for Grafana Ingress.
     ## Should be provided if Ingress is enable.
     ##
-    # ingressClassName: nginx
+    ingressClassName: nginx
 
     ## Annotations for Grafana Ingress
     ##
     annotations:
       cert-manager.io/cluster-issuer: letsdevops-custom-ca-clusterissuer
-      kubernetes.io/ingress.class: nginx
-      
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
 
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
@@ -910,19 +918,18 @@ grafana:
     ##
     # hosts:
     #   - grafana.domain.com
-    hosts:
-      - grafana.internal.letsdevops.link
+    hosts: ['monitoring.internal.letsdevops.link']
 
     ## Path for grafana ingress
-    path: /
+    path: "/grafana(/|$)(.*)"
 
     ## TLS configuration for grafana Ingress
     ## Secret must be manually created in the namespace
     ##
     tls: 
-    - secretName: grafana-internal-letsdevops-tls
+    - secretName: monitoring-internal-letsdevops-tls
       hosts:
-      -  grafana.internal.letsdevops.link
+      -  monitoring.internal.letsdevops.link
 
   sidecar:
     dashboards:
@@ -2683,13 +2690,15 @@ prometheus:
   #     someoneelse:$apr1$DMZX2Z4q$6SbQIfyuLQd.xmo/P0m2c.
 
   ingress:
-    enabled: false
+    enabled: true
 
     # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
     # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
-    # ingressClassName: nginx
+    ingressClassName: nginx
 
-    annotations: {}
+    annotations:
+      cert-manager.io/cluster-issuer: letsdevops-custom-ca-clusterissuer
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
     labels: {}
 
     ## Redirect ingress to an additional defined port on the service
@@ -2700,11 +2709,11 @@ prometheus:
     ##
     # hosts:
     #   - prometheus.domain.com
-    hosts: []
+    hosts: ['monitoring.internal.letsdevops.link']
 
     ## Paths to use for ingress rules - one path should match the prometheusSpec.routePrefix
     ##
-    paths: []
+    paths: ["/prometheus"]
     # - /
 
     ## For Kubernetes >= 1.18 you should specify the pathType (determines how Ingress paths should be matched)
@@ -2714,10 +2723,10 @@ prometheus:
     ## TLS configuration for Prometheus Ingress
     ## Secret must be manually created in the namespace
     ##
-    tls: []
-      # - secretName: prometheus-general-tls
-      #   hosts:
-      #     - prometheus.example.com
+    tls:
+      - secretName: monitoring-internal-letsdevops-tls
+        hosts:
+          - monitoring.internal.letsdevops.link
 
   ## Configuration for creating an Ingress that will map to each Prometheus replica service
   ## prometheus.servicePerReplica must be enabled
