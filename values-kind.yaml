@@ -904,7 +904,7 @@ grafana:
     ##
     annotations:
       cert-manager.io/cluster-issuer: letsdevops-custom-ca-clusterissuer
-      nginx.ingress.kubernetes.io/rewrite-target: /$2
+      nginx.ingress.kubernetes.io/rewrite-target: /
       nginx.ingress.kubernetes.io/backend-protocol: HTTPS
 
       # kubernetes.io/ingress.class: nginx
@@ -922,7 +922,7 @@ grafana:
     hosts: ['monitoring.internal.letsdevops.link']
 
     ## Path for grafana ingress
-    path: '/grafana(/|$)(.*)'
+    path: '/grafana/'
 
     ## TLS configuration for grafana Ingress
     ## Secret must be manually created in the namespace
