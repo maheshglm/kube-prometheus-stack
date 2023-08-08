@@ -889,7 +889,6 @@ grafana:
     pspEnabled: false
   grafana.ini:
     server:
-      domain: monitoring.internal.letsdevops.link
       root_url: "https://monitoring.internal.letsdevops.link/grafana/"
       serve_from_sub_path: true
   ingress:
@@ -924,7 +923,7 @@ grafana:
     hosts: ['monitoring.internal.letsdevops.link']
 
     ## Path for grafana ingress
-    path: /grafana($|(/.*))
+    path: /grafana/
 
     ## TLS configuration for grafana Ingress
     ## Secret must be manually created in the namespace
