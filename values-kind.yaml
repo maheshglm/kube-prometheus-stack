@@ -887,9 +887,11 @@ grafana:
     ## If true, Grafana PSPs will be created
     ##
     pspEnabled: false
-  env:
-    GF_SERVER_ROOT_URL: 'https://monitoring.internal.letsdevops.link/grafana'
-    GF_SERVER_SERVE_FROM_SUB_PATH: 'true'
+  grafana.ini:
+    server:
+      domain: monitoring.internal.letsdevops.link
+      root_url: "https://monitoring.internal.letsdevops.link/grafana/"
+      serve_from_sub_path: true
   ingress:
     ## If true, Grafana Ingress will be created
     ##
