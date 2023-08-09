@@ -923,7 +923,7 @@ grafana:
     hosts: ['monitoring.internal.letsdevops.link']
 
     ## Path for grafana ingress
-    path: /grafana/
+    path: "/grafana(/|$)(.*)"
 
     ## TLS configuration for grafana Ingress
     ## Secret must be manually created in the namespace
